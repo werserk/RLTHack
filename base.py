@@ -1,9 +1,17 @@
 import glob
 import os
+import sys
+import warnings
 from typing import Union
 
 import pandas as pd
-from tqdm.notebook import tqdm
+
+warnings.simplefilter("ignore", category=pd.errors.DtypeWarning)
+
+if 'get_ipython' in sys.modules:  # Running in a notebook
+    from tqdm.notebook import tqdm
+else:  # Running in a script
+    from tqdm import tqdm
 
 
 class DataObj:
