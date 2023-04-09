@@ -3,36 +3,51 @@ import pandas as pd
 import utils
 import plotly.express as px
 
-def plot_winrate_44fz_builder(df):
+def get_winrate_plot(final_df, sort_col, fz):
+    df = final_df.copy()
+    
     df['winrate_44fz'] = df['win_qty_44fz']/df['procedure_qty_44fz']
-    df = df.fillna(0)
-    df["inn"] = df["inn"].astype(str) + "_"
-
-    winrate44_df = df[['inn', 'winrate_44fz', 'win_qty_44fz', 'procedure_qty_44fz']].copy()
-
-    fig = px.bar(winrate44_df.sort_values('winrate_44fz', ascending=False), x='inn', y='winrate_44fz', hover_data=['win_qty_44fz', 'procedure_qty_44fz'],
-                title='Процент выигранных тендеров для каждого ИНН по 44 федеральному закону', color='inn', 
-                labels={'inn':'ИНН', 'winrate_44fz':'Процент побед в тендерах', 'win_qty_44fz':'Количество побед в тендерах',
-                        'procedure_qty_44fz':'Количество участий в тендерах'})
-    fig.update_xaxes(tickangle=45)
-    return fig
-
-def plot_winrate_223fz_builder(df):
     df['winrate_223fz'] = df['win_qty_223fz']/df['procedure_qty_223fz']
     df = df.fillna(0)
-    df["inn"] = df["inn"].astype(str) + "_"
+    df['inn'] = df['inn'].astype(str) + "_"
+    
+    if fz == '44':
+        winrate44_df = df[['inn', 'winrate_44fz', 'win_qty_44fz', 'procedure_qty_44fz']].copy()
+        winrate44_df.columns = ['ИНН', 'Количество побед в тендерах', 'Количество участий в тендерах', 'winrate_44fz']
+        
+        if sort_col == 'Доля побед':
+            fig = px.bar(winrate44_df.sort_values('winrate_44fz', ascending=False), x='ИНН', 
+                         y=['Количество побед в тендерах', 'Количество участий в тендерах'],
+                         title=f'Статистика тендеров для каждого ИНН по {fz} федеральному закону', 
+                         labels={'variable':'', 'value':'Количество'})
+            fig.update_xaxes(tickangle=45)
+            return fig
+        else:
+            fig = px.bar(winrate44_df.sort_values('Количество участий в тендерах', ascending=False), x='ИНН', 
+                         y=['Количество побед в тендерах', 'Количество участий в тендерах'],
+                         title=f'Статистика тендеров для каждого ИНН по {fz} федеральному закону', 
+                         labels={'variable':'', 'value':'Количество'})
+            fig.update_xaxes(tickangle=45)
+            return fig
+    elif fz == '223':
+        winrate223_df = df[['inn', 'winrate_223fz', 'win_qty_223fz', 'procedure_qty_223fz']].copy()
+        winrate223_df.columns = ['ИНН', 'Количество побед в тендерах', 'Количество участий в тендерах', 'winrate_223fz']
 
-    print(df.info())
-
-    winrate223_df = df[['inn', 'winrate_223fz', 'win_qty_223fz', 'procedure_qty_223fz']].copy()
-
-    fig = px.bar(winrate223_df.sort_values('winrate_223fz', ascending=False), x='inn', y='winrate_223fz', hover_data=['win_qty_223fz', 'procedure_qty_223fz'],
-                title='Процент выигранных тендеров для каждого ИНН по 223 федеральному закону', color='inn', 
-                labels={'inn':'ИНН', 'winrate_223fz':'Процент побед в тендерах', 'win_qty_223fz':'Количество побед в тендерах',
-                        'procedure_qty_223fz':'Количество участий в тендерах'})
-    fig.update_xaxes(tickangle=45)
-    return fig
-
+        if sort_col == 'Доля побед':
+            fig = px.bar(winrate223_df.sort_values('winrate_223fz', ascending=False), x='ИНН', 
+                         y=['Количество побед в тендерах', 'Количество участий в тендерах'],
+                         title=f'Статистика тендеров для каждого ИНН по {fz} федеральному закону', 
+                         labels={'variable':'', 'value':'Количество'})
+            fig.update_xaxes(tickangle=45)
+            return fig
+        else:
+            fig = px.bar(winrate223_df.sort_values('Количество участий в тендерах', ascending=False), x='ИНН', 
+                         y=['Количество побед в тендерах', 'Количество участий в тендерах'],
+                         title=f'Статистика тендеров для каждого ИНН по {fz} федеральному закону', 
+                         labels={'variable':'', 'value':'Количество'})
+            fig.update_xaxes(tickangle=45)
+            return fig
+        
 def plot_contract_success(df):
     df["supplier_inn"] = df["supplier_inn"].astype(str) + "_"
     fig = px.bar(df.sort_values('termination', ascending=False), x='supplier_inn', y='termination',
@@ -97,9 +112,10 @@ if uploaded_file is not None:
                 file_name='comapines_comparison.csv',
                 mime='text/csv',
             )
-
-            st.plotly_chart(plot_winrate_44fz_builder(df))
-            st.plotly_chart(plot_winrate_223fz_builder(df))
+            col1, col2 = st.columns(2)
+            column_to_sort = col1.selectbox("По какой колонке сортировать", ["Доля побед", "Количество участий"])
+            select_law = col2.selectbox("Федеральный закон", ["44", "223"])
+            st.plotly_chart(get_winrate_plot(df, column_to_sort, select_law))
             st.plotly_chart(plot_contract_success(contract_success[contract_success["supplier_inn"].isin(inns["inn"])]))
     except pd.errors.ParserError:
         st.warning("Использован не тот раздилитель")
