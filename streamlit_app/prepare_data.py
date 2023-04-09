@@ -214,7 +214,7 @@ def prepare_full_from_config(config):
     return final_df, contract_success
 
 def ranking(df):
-    with open('/Users/deevs/development/programming/AIML/tasks_2023/rlt_hack/RLTHack/streamlit_app/models_with_threshes.pkl', 'rb') as f:
+    with open('./models_with_threshes.pkl', 'rb') as f:
         models, _ = pickle.load(f)
 
         test = cb.Pool(
@@ -229,8 +229,8 @@ def ranking(df):
     return res.tolist()
 
 def get_external_data():
-    ergip_union_inns = pd.read_csv("/Users/deevs/development/programming/AIML/tasks_2023/rlt_hack/RLTHack/streamlit_app/data/ergip_union_inns.csv").drop_duplicates().replace("none", np.nan)
-    ergul_union_inns = pd.read_csv("/Users/deevs/development/programming/AIML/tasks_2023/rlt_hack/RLTHack/streamlit_app/data/ergul_union_inns.csv").drop_duplicates().replace("none", np.nan)
+    ergip_union_inns = pd.read_csv("./data/ergip_union_inns.csv").drop_duplicates().replace("none", np.nan)
+    ergul_union_inns = pd.read_csv("./data/ergul_union_inns.csv").drop_duplicates().replace("none", np.nan)
     
     ergip_union_inns["inn"] = ergip_union_inns["inn"].astype(np.int64).astype(str)
     ergul_union_inns["inn"] = ergul_union_inns["inn"].astype(np.int64).astype(str)
@@ -245,7 +245,7 @@ def get_external_data():
 config = {
     
     'paths':{
-        'csv_path': '/Users/deevs/development/programming/AIML/tasks_2023/rlt_hack/RLTHack/streamlit_app/data',
+        'csv_path': './data',
     },
     
     'data':{
