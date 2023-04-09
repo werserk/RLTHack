@@ -59,7 +59,7 @@ def plot_contract_success(df):
 if "data" not in st.session_state:
     st.session_state["data"] = utils.load()
 
-contract_success = pd.read_feather("/Users/deevs/development/programming/AIML/tasks_2023/rlt_hack/RLTHack/streamlit_app/data/contract_success.feather")
+contract_success = pd.read_feather("./data/contract_success.feather")
 
 uploaded_file = st.file_uploader("Загрузите список ИНН", type='csv')
 
