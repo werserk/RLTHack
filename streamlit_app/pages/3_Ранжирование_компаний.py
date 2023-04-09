@@ -43,9 +43,13 @@ if uploaded_file is not None:
             df = df[["inn", "score"]]
             df = df[df['inn'].isin(inns['inn'])]
             df = df.head(number_of_cols)
+            
+            df_to_show = df.rename(columns = {"inn": "ИНН", "score": "Рейтинг"})
+            df_to_show = df_to_show.reset_index(drop = True)
+
             df.set_index("inn", inplace = True)
 
-            st.dataframe(df, use_container_width = True)
+            st.dataframe(df_to_show, use_container_width = True)
 
             st.download_button(
                 label="Скачать",

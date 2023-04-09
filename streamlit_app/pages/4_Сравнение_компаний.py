@@ -17,9 +17,10 @@ def get_winrate_plot(final_df, sort_col, fz):
         
         if sort_col == 'Доля побед':
             fig = px.bar(winrate44_df.sort_values('winrate_44fz', ascending=False), x='ИНН', 
-                         y=['Количество побед в тендерах', 'Количество участий в тендерах'],
+                         y=['winrate_44fz'],
                          title=f'Статистика тендеров для каждого ИНН по {fz} федеральному закону', 
-                         labels={'variable':'', 'value':'Количество'})
+                         labels={'variable':'', 'value':'Количество', 'winrate_44fz': 'Доля побед'}, color='ИНН')
+
             fig.update_xaxes(tickangle=45)
             return fig
         else:
@@ -35,9 +36,9 @@ def get_winrate_plot(final_df, sort_col, fz):
 
         if sort_col == 'Доля побед':
             fig = px.bar(winrate223_df.sort_values('winrate_223fz', ascending=False), x='ИНН', 
-                         y=['Количество побед в тендерах', 'Количество участий в тендерах'],
+                         y=['winrate_223fz'],
                          title=f'Статистика тендеров для каждого ИНН по {fz} федеральному закону', 
-                         labels={'variable':'', 'value':'Количество'})
+                         labels={'variable':'', 'value':'Количество', 'winrate_223fz': 'Доля побед'}, color='ИНН')
             fig.update_xaxes(tickangle=45)
             return fig
         else:
@@ -98,7 +99,7 @@ if uploaded_file is not None:
             df_to_show["Статус активности"] = df_to_show["Статус активности"].apply(lambda x: "Закрыта" if x else "Работает")
             who_dict = {
                 0: "Юр. лицо",
-                1: "Физ. лицо",
+                1: "Юр. лицо",
                 -1: "ИП"
             }
             df_to_show["Юридический статус"] = df_to_show["Юридический статус"].apply(lambda x: who_dict[x])
