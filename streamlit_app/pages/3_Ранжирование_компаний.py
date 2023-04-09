@@ -7,7 +7,7 @@ import utils
 import plotly.express as px
 
 def get_fi_plot():
-    fi = pd.read_csv('/Users/deevs/development/programming/AIML/tasks_2023/rlt_hack/RLTHack/streamlit_app/data/feature_importance.csv', index_col='0')
+    fi = pd.read_csv('./data/feature_importance.csv', index_col='0')
     fi['1'] = np.log(fi['1'])
     fig = px.bar(fi.iloc[:10], y=fi.index[:10], x='1', labels={'y':'', '1':'Значение важности'}, 
              title='Топ 10 самых важных признаков при работе модели', color=fi.index[:10])
