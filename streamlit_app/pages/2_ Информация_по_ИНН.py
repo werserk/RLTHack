@@ -3,6 +3,8 @@ import pandas as pd
 import utils
 import plotly.express as px
 
+st.set_page_config(layout="wide")
+
 def pieplot_builder(df):
     financial_columns_for_pieplot = ['inn', 'str_code_1400', 'str_code_1500', 'str_code_1600']
     pieplot = pd.DataFrame(df.loc[df[financial_columns_for_pieplot[1:]].values > 0, financial_columns_for_pieplot].iloc[0]).T

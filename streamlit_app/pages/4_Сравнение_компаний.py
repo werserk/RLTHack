@@ -3,6 +3,8 @@ import pandas as pd
 import utils
 import plotly.express as px
 
+st.set_page_config(layout="wide")
+
 def get_winrate_plot(final_df, sort_col, fz):
     df = final_df.copy()
     
@@ -13,7 +15,7 @@ def get_winrate_plot(final_df, sort_col, fz):
     
     if fz == '44':
         winrate44_df = df[['inn', 'winrate_44fz', 'win_qty_44fz', 'procedure_qty_44fz']].copy()
-        winrate44_df.columns = ['ИНН', 'Количество побед в тендерах', 'Количество участий в тендерах', 'winrate_44fz']
+        winrate44_df.columns = ['ИНН',  'winrate_44fz', 'Количество участий в тендерах', 'Количество побед в тендерах']
         
         if sort_col == 'Доля побед':
             fig = px.bar(winrate44_df.sort_values('winrate_44fz', ascending=False), x='ИНН', 
@@ -32,7 +34,7 @@ def get_winrate_plot(final_df, sort_col, fz):
             return fig
     elif fz == '223':
         winrate223_df = df[['inn', 'winrate_223fz', 'win_qty_223fz', 'procedure_qty_223fz']].copy()
-        winrate223_df.columns = ['ИНН', 'Количество побед в тендерах', 'Количество участий в тендерах', 'winrate_223fz']
+        winrate223_df.columns = ['ИНН', 'winrate_223fz', 'Количество участий в тендерах', 'Количество побед в тендерах']
 
         if sort_col == 'Доля побед':
             fig = px.bar(winrate223_df.sort_values('winrate_223fz', ascending=False), x='ИНН', 
@@ -78,9 +80,11 @@ if uploaded_file is not None:
                 st.warning(f"Данные ИНН не найдены в базе: {','.join(missed_inns)}")
             df = df[df['inn'].isin(inns['inn'])]
 
-            df_to_show = df[["inn", "termination", "is_entity_person", "score", "str_code_2110", "str_code_2400", "str_code_1600", "amount_due", "net_margin", "current_liquid", "winrate_44fz", "winrate_223fz", "procedure_qty_44fz", "procedure_qty_223fz"]]
+            df_to_show = df[["inn", "name", "region", "termination", "is_entity_person", "score", "str_code_2110", "str_code_2400", "str_code_1600", "amount_due", "net_margin", "current_liquid", "winrate_44fz", "winrate_223fz", "procedure_qty_44fz", "procedure_qty_223fz"]]
             rename_dict = {
                 "inn": "ИНН",
+                "name": "Название",
+                "region": "Регион",
                 "termination": "Статус активности",
                 "is_entity_person": "Юридический статус",
                 "score": "Рейтинг доверия",
@@ -103,7 +107,7 @@ if uploaded_file is not None:
                 -1: "ИП"
             }
             df_to_show["Юридический статус"] = df_to_show["Юридический статус"].apply(lambda x: who_dict[x])
-            df_to_show = df_to_show.reset_index(drop = True)
+            df_to_show = df_to_show.set_index("ИНН")
 
             st.dataframe(df_to_show, use_container_width = True)
 

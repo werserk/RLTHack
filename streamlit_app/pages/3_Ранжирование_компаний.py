@@ -6,6 +6,8 @@ import pickle
 import utils
 import plotly.express as px
 
+st.set_page_config(layout="wide")
+
 def get_fi_plot():
     fi = pd.read_csv('./data/feature_importance.csv', index_col='0')
     fi['1'] = np.log(fi['1'])
@@ -40,12 +42,13 @@ if uploaded_file is not None:
             missed_inns = set(inns["inn"]) - set(df["inn"])
             if missed_inns:
                 st.warning(f"Данные ИНН не найдены в базе: {','.join(missed_inns)}")
-            df = df[["inn", "score"]]
+            df = df[["inn", "name", "score"]]
             df = df[df['inn'].isin(inns['inn'])]
             df = df.head(number_of_cols)
             
-            df_to_show = df.rename(columns = {"inn": "ИНН", "score": "Рейтинг"})
+            df_to_show = df.rename(columns = {"inn": "ИНН", "name": "Название","score": "Рейтинг"})
             df_to_show = df_to_show.reset_index(drop = True)
+            df_to_show = df_to_show.set_index("ИНН")
 
             df.set_index("inn", inplace = True)
 

@@ -1,5 +1,7 @@
 import streamlit as st
 
+st.set_page_config(layout="wide")
+
 st.markdown("""
 **Начало работы с сайтом: Импорт CSV файла с ИНН**
 
