@@ -273,8 +273,10 @@ final_df['winrate_full'] = (final_df['win_qty_full'] / final_df['procedure_qty_f
 final_df["notna"] = final_df.notna().sum(axis=1) / len(final_df.columns)
 final_df['delta_days_norm'] = (final_df['delta_days'] / final_df['delta_days'].mean()).clip(0, 1).fillna(0.1)
 # final_df["termination_coef"] = (final_df["is_termination"] / final_df["id_contract"]).fillna(0.5)
-final_df["score"] = final_df["prediction"] * final_df["notna"] * ((final_df["winrate_44fz"] \
-                            + final_df["winrate_223fz"]) / 2) * final_df['delta_days_norm']
+# final_df["score"] = final_df["prediction"] * final_df["notna"] * ((final_df["winrate_44fz"] \
+#                             + final_df["winrate_223fz"]) / 2) * final_df['delta_days_norm']
+final_df["score"] = (final_df["prediction"] + final_df["notna"] + final_df["winrate_44fz"] + final_df["winrate_223fz"] + final_df['delta_days_norm']) / 5
+
 eg_info = get_external_data()
 final_df = final_df.merge(eg_info, how="left", on="inn")
 final_df = final_df.sort_values(by="score", ascending=False)
