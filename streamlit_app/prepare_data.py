@@ -169,8 +169,17 @@ def catboost_info(df):
     df['is_entity_person'] = df['is_entity_person'].fillna(-1).astype(int)
     return df
 
+
+def get_contract_main_info_features_positive(full_data):
+    df = copy.deepcopy(full_data.data["contract_main_info"]).merge(copy.deepcopy(full_data.data["contract_termination"]), how="left", on="id_contract")
+    df["termination"] = df["t_termination_date"].isna()
+    info = df[["termination", "supplier_inn"]].groupby("supplier_inn").agg("sum")
+    return info["termination"]
+
+
 def prepare_full_from_config(config):
     full_data = DataObj(config.paths.csv_path)
+
     full_data.data["contract_main_info"] = full_data.data["contract_main_info"].dropna(subset=["supplier_inn"])
     full_data.data["contract_main_info"]["supplier_inn"] = full_data.data["contract_main_info"]["supplier_inn"].astype(np.int64)
 
@@ -196,8 +205,13 @@ def prepare_full_from_config(config):
     final_df = final_df.reset_index(drop=True)
 
     final_df = catboost_info(final_df)
+    final_df['inn'] = final_df['inn'].astype(int).astype(str)
 
-    return final_df
+    contract_success = get_contract_main_info_features_positive(full_data).reset_index()
+    contract_success['supplier_inn'] = contract_success['supplier_inn'].astype(int).astype(str)
+    contract_success = contract_success[contract_success['supplier_inn'].isin(final_df['inn'].unique())]
+
+    return final_df, contract_success
 
 def ranking(df):
     with open('/Users/deevs/development/programming/AIML/tasks_2023/rlt_hack/RLTHack/streamlit_app/models_with_threshes.pkl', 'rb') as f:
@@ -236,10 +250,22 @@ config = {
 
 config = OmegaConf.create(config)
 
-final_df = prepare_full_from_config(config)
+final_df, contract_success = prepare_full_from_config(config)
 final_df["prediction"] = ranking(final_df)
-final_df = final_df.sort_values(by="prediction", ascending=False)
-final_df["index"] = range(1, len(final_df) + 1)
-final_df["score"] = (1 - (final_df["index"] / len(final_df))) * 100
-final_df = final_df.reset_index()
+final_df['winrate_44fz'] = (final_df['win_qty_44fz']/final_df['procedure_qty_44fz']).fillna(0)
+final_df['winrate_223fz'] = (final_df['win_qty_223fz']/final_df['procedure_qty_223fz']).fillna(0)
+final_df["notna"] = final_df.notna().sum(axis=1) / len(final_df.columns)
+final_df['delta_days_norm'] = (final_df['delta_days'] / final_df['delta_days'].mean()).clip(0, 1).fillna(0.1)
+# final_df["termination_coef"] = (final_df["is_termination"] / final_df["id_contract"]).fillna(0.5)
+final_df["score"] = final_df["prediction"] * final_df["notna"] * ((final_df["winrate_44fz"] \
+                            + final_df["winrate_223fz"]) / 2) * final_df['delta_days_norm']
+final_df = final_df.sort_values(by="score", ascending=False)
+final_df = final_df.reset_index(drop=True)
+contract_success = contract_success.reset_index()
+
+final_df['inn'] = final_df['inn'].astype(str)
+
 final_df.to_feather("data/data.feather")
+contract_success.to_feather("data/contract_success.feather")
+
+
