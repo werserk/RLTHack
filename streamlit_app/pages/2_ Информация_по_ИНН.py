@@ -31,7 +31,7 @@ if "data" not in st.session_state:
 
 inn = st.text_input("Введите ИНН:")
 
-if st.button('Найти инофрмацию'):
+if st.button('Найти информацию'):
     df = st.session_state["data"]
     company = df[df["inn"] == inn]
 
@@ -45,10 +45,12 @@ if st.button('Найти инофрмацию'):
         }
 
         exp3 = st.expander("Основное")
+        exp3.metric("Название компании",  company["name"].iloc[0])
+        exp3.metric("Регион", company["region"].iloc[0])
         col11, col12, col13 = exp3.columns(3)
-        col11.metric("Статус активности", "Закрыта" if company["termination"].iloc[0] else "Работает")
-        col12.metric("Юридический статус", who_dict[company["is_entity_person"].iloc[0]])
-        col13.metric("Рейтинг доверия", round(company["score"], 2))
+        col11.metric("Рейтинг доверия", round(company["score"], 2))
+        col12.metric("Статус активности", "Закрыта" if company["termination"].iloc[0] else "Работает")
+        col13.metric("Юридический статус", who_dict[company["is_entity_person"].iloc[0]])
 
         exp1 = st.expander("Финансовая информация")
 

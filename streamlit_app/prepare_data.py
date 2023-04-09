@@ -228,6 +228,19 @@ def ranking(df):
         res /= 5
     return res.tolist()
 
+def get_external_data():
+    ergip_union_inns = pd.read_csv("/Users/deevs/development/programming/AIML/tasks_2023/rlt_hack/RLTHack/streamlit_app/data/ergip_union_inns.csv").drop_duplicates().replace("none", np.nan)
+    ergul_union_inns = pd.read_csv("/Users/deevs/development/programming/AIML/tasks_2023/rlt_hack/RLTHack/streamlit_app/data/ergul_union_inns.csv").drop_duplicates().replace("none", np.nan)
+    
+    ergip_union_inns["inn"] = ergip_union_inns["inn"].astype(np.int64).astype(str)
+    ergul_union_inns["inn"] = ergul_union_inns["inn"].astype(np.int64).astype(str)
+    
+    ergip_union_inns = ergip_union_inns.groupby("inn").agg(lambda x: list(x)[-1]).reset_index()
+    ergul_union_inns = ergul_union_inns.groupby("inn").agg(lambda x: list(x)[-1]).reset_index()
+    
+    eg_info = pd.concat([ergip_union_inns, ergul_union_inns])
+    return eg_info
+
 
 config = {
     
@@ -259,6 +272,8 @@ final_df['delta_days_norm'] = (final_df['delta_days'] / final_df['delta_days'].m
 # final_df["termination_coef"] = (final_df["is_termination"] / final_df["id_contract"]).fillna(0.5)
 final_df["score"] = final_df["prediction"] * final_df["notna"] * ((final_df["winrate_44fz"] \
                             + final_df["winrate_223fz"]) / 2) * final_df['delta_days_norm']
+eg_info = get_external_data()
+final_df = final_df.merge(eg_info, how="left", on="inn")
 final_df = final_df.sort_values(by="score", ascending=False)
 final_df = final_df.reset_index(drop=True)
 contract_success = contract_success.reset_index()
